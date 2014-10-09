@@ -2,14 +2,12 @@
 UI."""
 
 import json
+from .router import Router
+from .settings import DEBUG
+from .exceptions import ClientError
 
 DOC_URL = 'https://github.com/ProjetPP/Documentation/blob/master/' \
           'module-communication.md#frontend'
-
-class ClientError(Exception):
-    """Exception raised by the router for showing an error to the
-    client."""
-    pass
 
 def make_response(start_response, status, content_type, response):
     """Shortcut for making a response to the client's request."""
@@ -75,7 +73,10 @@ def on_post(environ, start_response):
     except ClientError as exc:
         return on_client_error(exc, start_response)
     except Exception: # pragma: no cover # pylint: disable=W0703
-        return on_internal_error(start_response)
+        if DEBUG:
+            raise
+        else:
+            return on_internal_error(start_response)
 
 
 def app(environ, start_response):
