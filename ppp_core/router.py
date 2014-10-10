@@ -4,6 +4,7 @@ import json
 import logging
 import requests
 import operator
+import functools
 from .config import Config
 from .exceptions import ClientError
 
@@ -22,16 +23,21 @@ class Router:
     def answer(self):
         # First make all requests so modules can prepare their answer
         # while we send requests to other modules
-        streams = [(m, requests.get(m.url, stream=True))
-                   for m in self.config.modules]
+        streams = self._get_streams()
         answers = map(lambda x:(x[0], json.loads(x[1].content)), streams)
-        answers = map(self._process_answer, answers)
-        answers = filter(bool, answers)
-        answers = list(answers)
+        answers = list(filter(bool, map(self._process_answer, answers)))
         if answers:
             return max(answers, key=operator.itemgetter('pertinence'))
         else:
             return {'language': self.language, 'pertinence': 0, 'tree': self.tree}
+
+    def _get_streams(self):
+        headers = {'Content-type': 'application/json',
+                   'Accept': 'application/json'}
+        payload = json.dumps({'language': self.language, 'tree': self.tree})
+        getter = functools.partial(requests.get, stream=True,
+                                   headers=headers, data=payload)
+        return [(m, getter(m.url)) for m in self.config.modules]
 
     def _process_answer(self, t):
         (module, answer) = t

@@ -1,5 +1,6 @@
 """Test the core's capabilities to calling a third-party module."""
 
+import json
 from httmock import urlmatch, HTTMock, with_httmock, all_requests
 
 from ppptest import PPPTestCase
@@ -45,8 +46,10 @@ def my_module_mock(url, request):
 
 @urlmatch(netloc='test', path='/my_module2/')
 def my_module2_mock(url, request):
+    body = json.loads(request.body)
+    body['pertinence'] = 1
     return {'status_code': 200,
-            'content': '{"language": "en", "pertinence": 1, "tree": {}}'}
+            'content': json.dumps(body)}
 
 @urlmatch(netloc='test', path='/my_module3/')
 def my_module3_mock(url, request):
@@ -67,6 +70,7 @@ class CallModuleTest(PPPTestCase):
     def testQueriesMultipleModule(self):
         self.config_file.write(three_modules_config)
         self.config_file.seek(0)
-        q = {'language': 'en', 'tree': {}}
+        q = {'language': 'en', 'tree': {'type': 'missing'}}
         with HTTMock(my_module_mock, my_module2_mock, my_module3_mock):
-            self.assertResponse(q, {'language': 'en', 'pertinence': 1, 'tree': {}})
+            self.assertResponse(q, {'language': 'en', 'pertinence': 1,
+                                    'tree': {'type': 'missing'}})
