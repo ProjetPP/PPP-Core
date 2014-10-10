@@ -3,7 +3,7 @@ UI."""
 
 import json
 from .router import Router
-from .settings import DEBUG
+from .config import Config
 from .exceptions import ClientError
 
 DOC_URL = 'https://github.com/ProjetPP/Documentation/blob/master/' \
@@ -73,7 +73,7 @@ def on_post(environ, start_response):
     except ClientError as exc:
         return on_client_error(exc, start_response)
     except Exception: # pragma: no cover # pylint: disable=W0703
-        if DEBUG:
+        if Config().debug:
             raise
         else:
             return on_internal_error(start_response)

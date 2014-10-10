@@ -5,3 +5,6 @@ class ClientError(Exception):
     client."""
     pass
 
+class InvalidConfig(Exception):
+    """Exception raised when there is an error in the config."""
+    pass

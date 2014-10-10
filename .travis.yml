@@ -5,7 +5,7 @@ python:
   - 3.4
 
 install:
-    - pip install scrutinizer-ocular coverage webtest
+    - pip install scrutinizer-ocular coverage webtest httmock requests
 
 before_script:
   - ./setup.py install
