@@ -21,6 +21,10 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
     ],
+    install_requires=[
+        'requests',
+        'ppp_datamodel',
+    ],
     packages=[
         'ppp_core',
     ],

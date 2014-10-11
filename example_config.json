@@ -1,0 +1,10 @@
+{
+    "debug": false,
+    "modules": [
+        {
+            "name": "my_module",
+            "url": "http://localhost/my_module/",
+            "coefficient": 1
+        }
+    ]
+}
