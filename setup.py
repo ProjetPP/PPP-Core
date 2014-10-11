@@ -21,6 +21,13 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
     ],
+    install_requires=[
+        'requests',
+        'ppp_datamodel',
+    ],
+    dependency_links=[
+        'git+https://github.com/ProjetPP/PPP-datamodel-Python.git',
+    ],
     packages=[
         'ppp_core',
     ],
