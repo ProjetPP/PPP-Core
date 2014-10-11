@@ -37,7 +37,15 @@ class Router:
         payload = json.dumps({'language': self.language, 'tree': self.tree})
         getter = functools.partial(requests.get, stream=True,
                                    headers=headers, data=payload)
-        return [(m, getter(m.url)) for m in self.config.modules]
+        streams = []
+        for module in self.config.modules:
+            try:
+                streams.append((module, getter(module.url)))
+            except requests.exceptions.ConnectionError as exc: # pragma: no cover
+                logging.warning('Module %s could not be queried: %s' %
+                                (module, exc.args[0]))
+                pass
+        return streams
 
     def _process_answer(self, t):
         (module, answer) = t
