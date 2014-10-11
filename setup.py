@@ -25,9 +25,6 @@ setup(
         'requests',
         'ppp_datamodel',
     ],
-    dependency_links=[
-        'git+https://github.com/ProjetPP/PPP-datamodel-Python.git',
-    ],
     packages=[
         'ppp_core',
     ],
