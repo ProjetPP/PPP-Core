@@ -46,7 +46,7 @@ class Router:
                 not isinstance(pertinence, float) and \
                 pertinence < 0 or pertinence > 1:
             logging.warning('Module %s answered with invalid pertinence: %r' %
-                    pertinence)
+                    (module, pertinence))
             return None
         answer['pertinence'] *= module.coefficient
         return answer

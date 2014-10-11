@@ -39,6 +39,23 @@ three_modules_config = """
     ]
 }"""
 
+one_valid_module_config = """
+{
+    "debug": true,
+    "modules": [
+        {
+            "name": "my_module",
+            "url": "http://test/my_module/",
+            "coefficient": 1
+        },
+        {
+            "name": "my_module4",
+            "url": "http://test/my_module4/",
+            "coefficient": 1
+        }
+    ]
+}"""
+
 @urlmatch(netloc='test', path='/my_module/')
 def my_module_mock(url, request):
     return {'status_code': 200,
@@ -55,6 +72,12 @@ def my_module2_mock(url, request):
 def my_module3_mock(url, request):
     return {'status_code': 200,
             'content': '{"language": "en", "pertinence": 0.5, "tree": {}}'}
+
+@urlmatch(netloc='test', path='/my_module4/')
+def my_module4_mock(url, request):
+    return {'status_code': 200,
+            'content': '{"language": "en", "pertinence": 1.5, '
+                       '"tree": {"type": "missing"}}'}
 
 class CallModuleTest(PPPTestCase):
     def testQueriesModule(self):
@@ -74,3 +97,10 @@ class CallModuleTest(PPPTestCase):
         with HTTMock(my_module_mock, my_module2_mock, my_module3_mock):
             self.assertResponse(q, {'language': 'en', 'pertinence': 1,
                                     'tree': {'type': 'missing'}})
+    def testQueriesMultipleModule(self):
+        self.config_file.write(one_valid_module_config)
+        self.config_file.seek(0)
+        q = {'language': 'en', 'tree': {'type': 'missing'}}
+        with HTTMock(my_module_mock, my_module4_mock):
+            self.assertResponse(q, {'language': 'en', 'pertinence': 0.5,
+                                    'tree': {}})

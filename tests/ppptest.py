@@ -32,5 +32,6 @@ class PPPTestCase(TestCase):
     def assertResponse(self, request, response):
         self.assertEqual(self.request(request), response)
     def assertStatusInt(self, request, status):
-        self.assertEqual(self.app.post_json('/', request, status='*').status_int, status)
+        res = self.app.post_json('/', request, status='*')
+        self.assertEqual(res.status_int, status)
 

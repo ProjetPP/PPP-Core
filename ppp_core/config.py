@@ -10,7 +10,7 @@ class Module(namedtuple('_Module', 'name url coefficient')):
     """Represents a modules of the core with its name, URL, and a
     coefficient applied to it self-computed pertinence."""
     def __new__(cls, name, url, coefficient=1, **kwargs):
-        if kwargs:
+        if kwargs: # pragma: no cover
             logging.warning('Ignored arguments to module config: %r' % kwargs)
         return super(Module, cls).__new__(cls,
                                           name=name,
@@ -23,8 +23,11 @@ class Config:
     def __init__(self, data=None):
         self.debug = True
         if not data:
-            with open(self.get_config_path()) as fd:
-                data = json.load(fd)
+            try:
+                with open(self.get_config_path()) as fd:
+                    data = json.load(fd)
+            except ValueError as exc:
+                raise InvalidConfig(*exc.args)
         self.modules = self._parse_modules(data.get('modules', {}))
         self.debug = data.get('debug', False)
 
