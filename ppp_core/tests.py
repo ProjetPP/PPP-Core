@@ -1,5 +1,7 @@
 """Test framework for running tests of the PPP core."""
 
+__all__ = ['PPPTestCase']
+
 import os
 import tempfile
 from ppp_core import app

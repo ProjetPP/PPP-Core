@@ -3,7 +3,7 @@
 import json
 from httmock import urlmatch, HTTMock, with_httmock, all_requests
 
-from ppptest import PPPTestCase
+from ppp_core.tests import PPPTestCase
 
 one_module_config = """
 {
