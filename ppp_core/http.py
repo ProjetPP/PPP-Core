@@ -11,7 +11,7 @@ from .exceptions import ClientError, InvalidConfig
 DOC_URL = 'https://github.com/ProjetPP/Documentation/blob/master/' \
           'module-communication.md#frontend'
 
-class RequestHandler:
+class HttpRequestHandler:
     """Handles one request."""
     def __init__(self, environ, start_response, router_class):
         self.environ = environ
@@ -95,4 +95,4 @@ class RequestHandler:
 
 def app(environ, start_response):
     """Function called by the WSGI server."""
-    return RequestHandler(environ, start_response, Router).dispatch()
+    return HttpRequestHandler(environ, start_response, Router).dispatch()
