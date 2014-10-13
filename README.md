@@ -41,7 +41,7 @@ from ppp_core import RequestHandler
 
 def app(environ, start_response):
     """Function called by the WSGI server."""
-    return RequestHandler(environ, start_response, Router).dispatch()
+    return HttpRequestHandler(environ, start_response, Router).dispatch()
 ```
 
 Where `Router` is a class of your own that implements the following
