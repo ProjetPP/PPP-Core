@@ -1,6 +1,6 @@
 """Test HTTP capabilities of the core's frontend."""
 
-from ppptest import PPPTestCase
+from ppp_core.tests import PPPTestCase
 
 class HttpTest(PPPTestCase):
     def testPostOnly(self):
