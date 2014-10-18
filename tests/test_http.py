@@ -16,9 +16,7 @@ class HttpTest(PPPTestCase):
              'predicate': {'type': 'resource', 'value': 'bar'},
              'object': {'type': 'resource', 'value': 'baz'},
             }}
-        r = q.copy()
-        r['pertinence'] = 0
-        self.assertResponse(q, r)
+        self.assertResponse(q, [])
     def testNoTree(self):
         q = {'language': 'en'}
         self.assertStatusInt(q, 400)
