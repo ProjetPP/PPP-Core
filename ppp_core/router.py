@@ -4,6 +4,7 @@ import json
 import logging
 import requests
 import operator
+import itertools
 import functools
 from .config import Config
 from .exceptions import ClientError
@@ -25,11 +26,11 @@ class Router:
         # while we send requests to other modules
         streams = self._get_streams()
         answers = map(lambda x:(x[0], json.loads(x[1].content)), streams)
-        answers = list(filter(bool, map(self._process_answer, answers)))
-        if answers:
-            return max(answers, key=operator.itemgetter('pertinence'))
-        else:
-            return {'language': self.language, 'pertinence': 0, 'tree': self.tree}
+        answers = map(self._process_answers, answers)
+        answers = itertools.chain(*answers) # Flatten answers lists
+        answers = filter(bool, answers) # Eliminate None values
+        return sorted(answers, key=operator.itemgetter('pertinence'),
+                      reverse=True)
 
     def _get_streams(self):
         headers = {'Content-type': 'application/json',
@@ -47,8 +48,11 @@ class Router:
                 pass
         return streams
 
-    def _process_answer(self, t):
-        (module, answer) = t
+    def _process_answers(self, t):
+        (module, answers) = t
+        return list(map(functools.partial(self._process_answer, module), answers))
+
+    def _process_answer(self, module, answer):
         pertinence = answer['pertinence']
         if not isinstance(pertinence, int) and \
                 not isinstance(pertinence, float) and \
