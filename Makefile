@@ -1,7 +1,6 @@
 PYTHON=python3
 
-all:
-	$(PYTHON) setup.py
+all: install
 
 install:
 	$(PYTHON) setup.py install
