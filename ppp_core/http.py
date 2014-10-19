@@ -4,6 +4,9 @@ UI."""
 import json
 import logging
 
+from ppp_datamodel.exceptions import AttributeNotProvided
+from ppp_datamodel.communication import Request
+
 from .router import Router
 from .config import Config
 from .exceptions import ClientError, InvalidConfig
@@ -61,13 +64,18 @@ class HttpRequestHandler:
     def process_request(self, request):
         """Processes a request."""
         try:
-            request = json.loads(request.read().decode())
+            request = Request.from_json(request.read().decode())
         except ValueError:
             raise ClientError('Data is not valid JSON.')
-        answer = self.router_class(request).answer()
+        except KeyError:
+            raise ClientError('Missing mandatory field in request object.')
+        except AttributeNotProvided as exc:
+            raise ClientError('Attribute not provided: %s.' % exc.args[0])
+        answers = self.router_class(request).answer()
+        answers = [x.as_dict() for x in answers]
         return self.make_response('200 OK',
                                   'application/json',
-                                  json.dumps(answer)
+                                  json.dumps(answers)
                                  )
 
     def on_post(self):

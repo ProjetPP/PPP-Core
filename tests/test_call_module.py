@@ -3,7 +3,10 @@
 import json
 from httmock import urlmatch, HTTMock, with_httmock, all_requests
 
+from ppp_datamodel import Missing
+from ppp_datamodel.communication import Request, Response
 from ppp_core.tests import PPPTestCase
+from ppp_core import app
 
 one_module_config = """
 {
@@ -59,7 +62,8 @@ one_valid_module_config = """
 @urlmatch(netloc='test', path='/my_module/')
 def my_module_mock(url, request):
     return {'status_code': 200,
-            'content': '[{"language": "en", "pertinence": 0.5, "tree": {}}]'}
+            'content': '[{"language": "en", "pertinence": 0.5, '
+                       '"tree": {"type": "missing"}}]'}
 
 @urlmatch(netloc='test', path='/my_module2/')
 def my_module2_mock(url, request):
@@ -71,7 +75,8 @@ def my_module2_mock(url, request):
 @urlmatch(netloc='test', path='/my_module3/')
 def my_module3_mock(url, request):
     return {'status_code': 200,
-            'content': '[{"language": "en", "pertinence": 0.5, "tree": {}}]'}
+            'content': '[{"language": "en", "pertinence": 0.5,'
+            '"tree": {"type": "missing"}}]'}
 
 @urlmatch(netloc='test', path='/my_module4/')
 def my_module4_mock(url, request):
@@ -79,7 +84,7 @@ def my_module4_mock(url, request):
             'content': '[{"language": "en", "pertinence": 1.5, '
                        '"tree": {"type": "missing"}}]'}
 
-class CallModuleTest(PPPTestCase):
+class CallModuleTest(PPPTestCase(app)):
     def testQueriesModule(self):
         self.config_file.write(one_module_config)
         self.config_file.seek(0)
@@ -89,18 +94,16 @@ class CallModuleTest(PPPTestCase):
              'object': {'type': 'resource', 'value': 'baz'},
             }}
         with HTTMock(my_module_mock):
-            self.assertResponse(q, [{'language': 'en', 'pertinence': 0.5, 'tree': {}}])
+            self.assertResponse(q, [Response('en', 0.5, Missing())])
     def testQueriesMultipleModule(self):
         self.config_file.write(three_modules_config)
         self.config_file.seek(0)
-        q = {'language': 'en', 'tree': {'type': 'missing'}}
+        q = Request('en', Missing())
         with HTTMock(my_module_mock, my_module2_mock, my_module3_mock):
-            self.assertResponse(q, [{'language': 'en', 'pertinence': 1,
-                                     'tree': {'type': 'missing'}}])
+            self.assertResponse(q, [Response('en', 1, Missing())])
     def testQueriesMultipleModule(self):
         self.config_file.write(one_valid_module_config)
         self.config_file.seek(0)
-        q = {'language': 'en', 'tree': {'type': 'missing'}}
+        q = Request('en', Missing())
         with HTTMock(my_module_mock, my_module4_mock):
-            self.assertResponse(q, [{'language': 'en', 'pertinence': 0.5,
-                                     'tree': {}}])
+            self.assertResponse(q, [Response('en', 0.5, Missing())])
