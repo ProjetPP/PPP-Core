@@ -3,10 +3,12 @@
 __all__ = ['PPPTestCase']
 
 import os
+import json
 import tempfile
 from ppp_core import app
 from webtest import TestApp
 from unittest import TestCase
+from ppp_datamodel.communication import Request, Response
 
 base_config = """
 {
@@ -30,11 +32,18 @@ class PPPTestCase(TestCase):
         super(PPPTestCase, self).tearDown()
 
     def request(self, obj):
-        return self.app.post_json('/', obj).json
+        if isinstance(obj, Request):
+            obj = obj.as_dict()
+        elif isinstance(obj, str):
+            obj = json.loads(obj)
+        j = self.app.post_json('/', obj).json
+        return list(map(Response.from_json, j))
     def assertResponse(self, request, response):
         self.assertEqual(self.request(request), response)
-    def assertResponseIn(self, request, response):
-        self.assertIn(self.request(request), response)
+    def assertResponsesIn(self, request, responses):
+        self.assertTrue(all(x in response for x in self.request(request)))
+    def assertResponsesCount(self, request, count):
+        self.assertEqual(len(self.request(request)), count)
     def assertStatusInt(self, request, status):
         res = self.app.post_json('/', request, status='*')
         self.assertEqual(res.status_int, status)
