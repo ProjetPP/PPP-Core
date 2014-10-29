@@ -107,7 +107,7 @@ class CallModuleTest(PPPTestCase(app)):
     def testQueriesMultipleModule(self):
         self.config_file.write(three_modules_config)
         self.config_file.seek(0)
-        q = Request('1', 'en', {}, [], Missing())
+        q = Request('1', 'en', Missing(), {}, [])
         m1 = {'relevance': 0.5, 'accuracy': 0.5}
         m2 = {'relevance': 0.3, 'accuracy': 1}
         m3 = {'relevance': 0.55, 'accuracy': 0.5}
@@ -123,7 +123,7 @@ class CallModuleTest(PPPTestCase(app)):
     def testQueriesMultipleModuleWithFail(self):
         self.config_file.write(one_valid_module_config)
         self.config_file.seek(0)
-        q = Request('1', 'en', {}, [], Missing())
+        q = Request('1', 'en', Missing(), {}, [])
         m = {'relevance': 0.5, 'accuracy': 0.5}
         with HTTMock(my_module_mock, my_module4_mock):
             self.assertResponse(q, [

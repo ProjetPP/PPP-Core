@@ -6,6 +6,7 @@ import requests
 import operator
 import itertools
 import functools
+from ppp_datamodel import AbstractNode
 from ppp_datamodel.communication import Request, Response
 from .config import Config
 from .exceptions import ClientError, BadGateway
@@ -16,8 +17,9 @@ class Router:
     def __init__(self, request):
         self.id = request.id
         self.language = request.language
+        assert isinstance(request.tree, str) or \
+                isinstance(request.tree, AbstractNode)
         self.tree = request.tree
-        self.sentence = request.sentence
         self.measures = request.measures
         self.trace = request.trace
         self.config = Config()
@@ -38,8 +40,8 @@ class Router:
         headers = {'Content-type': 'application/json',
                    'Accept': 'application/json'}
         payload = Request(self.id, self.language,
-                          self.measures, self.trace,
-                          self.tree, self.sentence).as_json()
+                          self.tree,
+                          self.measures, self.trace).as_json()
         getter = functools.partial(requests.post, stream=True,
                                    headers=headers, data=payload)
         streams = []
