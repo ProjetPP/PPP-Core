@@ -8,7 +8,7 @@ import itertools
 import functools
 from ppp_datamodel.communication import Request, Response
 from .config import Config
-from .exceptions import ClientError
+from .exceptions import ClientError, BadGateway
 
 s = lambda x:x if isinstance(x, str) else x.decode()
 
@@ -26,7 +26,8 @@ class Router:
         answers = map(self._process_answers, answers)
         answers = itertools.chain(*list(answers)) # Flatten answers lists
         answers = filter(bool, answers) # Eliminate None values
-        return sorted(answers, key=operator.attrgetter('pertinence'),
+        # TODO: should sort according to accuracy too
+        return sorted(answers, key=lambda x:x.measures['relevance'],
                       reverse=True)
 
     def _get_streams(self):
@@ -57,18 +58,20 @@ class Router:
     def _process_answers(self, t):
         if t:
             (module, answers) = t
-            answers = map(Response.from_json, answers)
+            answers = map(Response.from_dict, answers)
             return list(map(functools.partial(self._process_answer, module), answers))
         else:
             return []
 
     def _process_answer(self, module, answer):
-        pertinence = answer.pertinence
-        if not isinstance(pertinence, int) and \
-                not isinstance(pertinence, float) and \
-                pertinence < 0 or pertinence > 1:
-            logging.warning('Module %s answered with invalid pertinence: %r' %
-                    (module, pertinence))
+        missing = {'accuracy', 'relevance'} - set(answer.measures)
+        if missing:
+            raise BadGateway('Missing mandatory measures from a module: %r' %
+                             missing)
+        accuracy = answer.measures['accuracy']
+        if accuracy < 0 or accuracy > 1:
+            logging.warning('Module %s answered with invalid accuracy: %r' %
+                    (module, accuracy))
             return None
-        answer.pertinence *= module.coefficient
+        answer.measures['relevance'] *= module.coefficient
         return answer

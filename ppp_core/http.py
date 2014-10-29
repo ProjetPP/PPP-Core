@@ -9,7 +9,7 @@ from ppp_datamodel.communication import Request
 
 from .router import Router
 from .config import Config
-from .exceptions import ClientError, InvalidConfig
+from .exceptions import ClientError, BadGateway, InvalidConfig
 
 DOC_URL = 'https://github.com/ProjetPP/Documentation/blob/master/' \
           'module-communication.md#frontend'
@@ -50,6 +50,13 @@ class HttpRequestHandler:
                                   hint
                                  )
 
+    def on_bad_gateway(self, exc):
+        """Returns a basic response when a module is buggy."""
+        return self.make_response('502 Bad Gateway',
+                                  'text/plain',
+                                  exc.args[0]
+                                 )
+
     def on_client_error(self, exc):
         """Handler for any error in the request detected by the core."""
         return self.on_bad_request(exc.args[0])
@@ -85,6 +92,8 @@ class HttpRequestHandler:
             return self.process_request(request)
         except ClientError as exc:
             return self.on_client_error(exc)
+        except BadGateway as exc:
+            return self.on_bad_gateway(exc)
         except InvalidConfig:
             raise
         except Exception as exc: # pragma: no cover # pylint: disable=W0703

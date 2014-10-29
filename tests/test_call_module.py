@@ -62,27 +62,33 @@ one_valid_module_config = """
 @urlmatch(netloc='test', path='/my_module/')
 def my_module_mock(url, request):
     return {'status_code': 200,
-            'content': '[{"language": "en", "pertinence": 0.5, '
-                       '"tree": {"type": "missing"}}]'}
+            'content': '[{"language": "en", '
+                         '"measures": {"relevance": 0.5, "accuracy": 0.5}, '
+                         '"tree": {"type": "missing"}, '
+                         '"trace": []}]'}
 
 @urlmatch(netloc='test', path='/my_module2/')
 def my_module2_mock(url, request):
-    body = json.loads(request.body)
-    body['pertinence'] = 1
+    body = Request.from_json(request.body)
+    response = Response('en', body.tree, {'pertinence': 0.3, 'accuracy': 1}, [])
     return {'status_code': 200,
-            'content': '[%s]' % json.dumps(body)}
+            'content': '[%s]' % response.as_json()}
 
 @urlmatch(netloc='test', path='/my_module3/')
 def my_module3_mock(url, request):
     return {'status_code': 200,
-            'content': '[{"language": "en", "pertinence": 0.5,'
-            '"tree": {"type": "missing"}}]'}
+            'content': '[{"language": "en", '
+                         '"measures": {"relevance": 0.55, "accuracy": 0.5}, '
+                         '"trace": [], '
+                         '"tree": {"type": "missing"}}]'}
 
 @urlmatch(netloc='test', path='/my_module4/')
 def my_module4_mock(url, request):
     return {'status_code': 200,
-            'content': '[{"language": "en", "pertinence": 1.5, '
-                       '"tree": {"type": "missing"}}]'}
+            'content': '[{"language": "en", '
+                         '"measures": {"relevance": 0.5, "accuracy": 1.5}, '
+                         '"trace": [], '
+                         '"tree": {"type": "missing"}}]'}
 
 class CallModuleTest(PPPTestCase(app)):
     def testQueriesModule(self):
@@ -94,16 +100,22 @@ class CallModuleTest(PPPTestCase(app)):
              'object': {'type': 'resource', 'value': 'baz'},
             }}
         with HTTMock(my_module_mock):
-            self.assertResponse(q, [Response('en', 0.5, Missing())])
+            self.assertResponse(q, [
+                Response('en', Missing(),
+                         {'relevance': 0.5, 'accuracy': 0.5},
+                         [])])
     def testQueriesMultipleModule(self):
         self.config_file.write(three_modules_config)
         self.config_file.seek(0)
         q = Request('en', Missing())
         with HTTMock(my_module_mock, my_module2_mock, my_module3_mock):
-            self.assertResponse(q, [Response('en', 1, Missing())])
-    def testQueriesMultipleModule(self):
+            self.assertStatusInt(q.as_dict(), 502)
+    def testQueriesMultipleModuleWithFail(self):
         self.config_file.write(one_valid_module_config)
         self.config_file.seek(0)
         q = Request('en', Missing())
         with HTTMock(my_module_mock, my_module4_mock):
-            self.assertResponse(q, [Response('en', 0.5, Missing())])
+            self.assertResponse(q, [
+                Response('en', Missing(),
+                         {'relevance': 0.5, 'accuracy': 0.5},
+                         [])])
