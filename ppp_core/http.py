@@ -100,11 +100,22 @@ class HttpRequestHandler:
             logging.error('Unknown exception: ', exc_info=exc)
             return self.on_internal_error()
 
+    def on_options(self):
+        """Tells the client we allow requests from any Javascript script."""
+        headers = [('Access-Control-Allow-Origin', '*'),
+                   ('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'),
+                   ('Access-Control-Allow-Headers', 'Content-Type'),
+                  ]
+
+        self.start_response('200 OK', headers)
+        return []
 
     def dispatch(self):
         """Handles dispatching of the request."""
         if self.environ['REQUEST_METHOD'] == 'POST':
             return self.on_post()
+        elif self.environ['REQUEST_METHOD'] == 'OPTIONS':
+            return self.on_options()
         else:
             return self.on_bad_method()
 
