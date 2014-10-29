@@ -67,12 +67,14 @@ class Router:
     def _process_answer(self, module, answer):
         missing = {'accuracy', 'relevance'} - set(answer.measures)
         if missing:
-            raise BadGateway('Missing mandatory measures from a module: %r' %
-                             missing)
-        accuracy = answer.measures['accuracy']
+            logging.warning('Missing mandatory measures from module %s: %r' %
+                             (missing, module))
+        accuracy = answer.measures.get('accuracy', 0)
+        relevance = answer.measures.get('relevance', 0)
         if accuracy < 0 or accuracy > 1:
             logging.warning('Module %s answered with invalid accuracy: %r' %
                     (module, accuracy))
             return None
-        answer.measures['relevance'] *= module.coefficient
+        answer.measures['accuracy'] = accuracy
+        answer.measures['relevance'] = relevance * module.coefficient
         return answer
