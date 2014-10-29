@@ -18,6 +18,8 @@ class Router:
         self.language = request.language
         self.tree = request.tree
         self.sentence = request.sentence
+        self.measures = request.measures
+        self.trace = request.trace
         self.config = Config()
 
     def answer(self):
@@ -35,7 +37,9 @@ class Router:
     def _get_streams(self):
         headers = {'Content-type': 'application/json',
                    'Accept': 'application/json'}
-        payload = Request(self.id, self.language, self.tree, self.sentence).as_json()
+        payload = Request(self.id, self.language,
+                          self.measures, self.trace,
+                          self.tree, self.sentence).as_json()
         getter = functools.partial(requests.post, stream=True,
                                    headers=headers, data=payload)
         streams = []
