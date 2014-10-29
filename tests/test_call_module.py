@@ -4,7 +4,7 @@ import json
 from httmock import urlmatch, HTTMock, with_httmock, all_requests
 
 from ppp_datamodel import Missing
-from ppp_datamodel.communication import Request, Response
+from ppp_datamodel.communication import Request, TraceItem, Response
 from ppp_core.tests import PPPTestCase
 from ppp_core import app
 
@@ -61,34 +61,34 @@ one_valid_module_config = """
 
 @urlmatch(netloc='test', path='/my_module/')
 def my_module_mock(url, request):
+    c = '"measures": {"relevance": 0.5, "accuracy": 0.5}, "tree": {"type": "missing"}'
     return {'status_code': 200,
-            'content': '[{"language": "en", '
-                         '"measures": {"relevance": 0.5, "accuracy": 0.5}, '
-                         '"tree": {"type": "missing"}, '
-                         '"trace": []}]'}
+            'content': '[{"language": "en", %s, '
+                         '"trace": [{"module": "module1", %s}]}]' %
+                         (c, c)}
 
 @urlmatch(netloc='test', path='/my_module2/')
 def my_module2_mock(url, request):
     body = Request.from_json(request.body)
-    response = Response('en', body.tree, {'pertinence': 0.3, 'accuracy': 1}, [])
+    m = {'pertinence': 0.3, 'accuracy': 1}
+    response = Response('en', body.tree, m,
+                        [TraceItem('module2', body.tree, m)])
     return {'status_code': 200,
             'content': '[%s]' % response.as_json()}
 
 @urlmatch(netloc='test', path='/my_module3/')
 def my_module3_mock(url, request):
+    c = '"measures": {"relevance": 0.55, "accuracy": 0.5}, "tree": {"type": "missing"}'
     return {'status_code': 200,
-            'content': '[{"language": "en", '
-                         '"measures": {"relevance": 0.55, "accuracy": 0.5}, '
-                         '"trace": [], '
-                         '"tree": {"type": "missing"}}]'}
+            'content': '[{"language": "en", %s, '
+                         '"trace": [{"module": "module3", %s}]}]' % (c, c)}
 
 @urlmatch(netloc='test', path='/my_module4/')
 def my_module4_mock(url, request):
+    c = '"measures": {"relevance": 0.5, "accuracy": 1.5}, "tree": {"type": "missing"}'
     return {'status_code': 200,
-            'content': '[{"language": "en", '
-                         '"measures": {"relevance": 0.5, "accuracy": 1.5}, '
-                         '"trace": [], '
-                         '"tree": {"type": "missing"}}]'}
+            'content': '[{"language": "en", %s, '
+                         '"trace": [{"module": "module4", %s}]}]' % (c, c)}
 
 class CallModuleTest(PPPTestCase(app)):
     def testQueriesModule(self):
@@ -99,11 +99,11 @@ class CallModuleTest(PPPTestCase(app)):
              'predicate': {'type': 'resource', 'value': 'bar'},
              'object': {'type': 'resource', 'value': 'baz'},
             }}
+        m = {'relevance': 0.5, 'accuracy': 0.5}
         with HTTMock(my_module_mock):
             self.assertResponse(q, [
-                Response('en', Missing(),
-                         {'relevance': 0.5, 'accuracy': 0.5},
-                         [])])
+                Response('en', Missing(), m,
+                         [TraceItem('module1', Missing(), m)])])
     def testQueriesMultipleModule(self):
         self.config_file.write(three_modules_config)
         self.config_file.seek(0)
@@ -114,8 +114,8 @@ class CallModuleTest(PPPTestCase(app)):
         self.config_file.write(one_valid_module_config)
         self.config_file.seek(0)
         q = Request('en', Missing())
+        m = {'relevance': 0.5, 'accuracy': 0.5}
         with HTTMock(my_module_mock, my_module4_mock):
             self.assertResponse(q, [
-                Response('en', Missing(),
-                         {'relevance': 0.5, 'accuracy': 0.5},
-                         [])])
+                Response('en', Missing(), m,
+                         [TraceItem('module1', Missing(), m)])])
