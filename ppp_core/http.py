@@ -103,9 +103,7 @@ class HttpRequestHandler:
 
     def dispatch(self):
         """Handles dispatching of the request."""
-        if self.environ['PATH_INFO'] != '/':
-            return self.on_unknown_uri()
-        elif self.environ['REQUEST_METHOD'] == 'POST':
+        if self.environ['REQUEST_METHOD'] == 'POST':
             return self.on_post()
         else:
             return self.on_bad_method()
