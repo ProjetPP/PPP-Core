@@ -70,7 +70,7 @@ def my_module_mock(url, request):
 @urlmatch(netloc='test', path='/my_module2/')
 def my_module2_mock(url, request):
     body = Request.from_json(request.body)
-    m = {'pertinence': 0.3, 'accuracy': 1}
+    m = {'relevance': 0.3, 'accuracy': 1}
     response = Response('en', body.tree, m,
                         [TraceItem('module2', body.tree, m)])
     return {'status_code': 200,
@@ -108,8 +108,18 @@ class CallModuleTest(PPPTestCase(app)):
         self.config_file.write(three_modules_config)
         self.config_file.seek(0)
         q = Request('1', 'en', Missing())
+        m1 = {'relevance': 0.5, 'accuracy': 0.5}
+        m2 = {'relevance': 0.3, 'accuracy': 1}
+        m3 = {'relevance': 0.55, 'accuracy': 0.5}
         with HTTMock(my_module_mock, my_module2_mock, my_module3_mock):
-            self.assertStatusInt(q.as_dict(), 502)
+            self.assertResponse(q, [
+                Response('en', Missing(), m3,
+                         [TraceItem('module3', Missing(), m3)]),
+                Response('en', Missing(), m1,
+                         [TraceItem('module1', Missing(), m1)]),
+                Response('en', Missing(), m2,
+                         [TraceItem('module2', Missing(), m2)]),
+                ])
     def testQueriesMultipleModuleWithFail(self):
         self.config_file.write(one_valid_module_config)
         self.config_file.seek(0)
