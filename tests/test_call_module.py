@@ -94,7 +94,7 @@ class CallModuleTest(PPPTestCase(app)):
     def testQueriesModule(self):
         self.config_file.write(one_module_config)
         self.config_file.seek(0)
-        q = {'language': 'en', 'tree': {'type': 'triple',
+        q = {'id': '1', 'language': 'en', 'tree': {'type': 'triple',
              'subject': {'type': 'resource', 'value': 'foo'},
              'predicate': {'type': 'resource', 'value': 'bar'},
              'object': {'type': 'resource', 'value': 'baz'},
@@ -107,13 +107,13 @@ class CallModuleTest(PPPTestCase(app)):
     def testQueriesMultipleModule(self):
         self.config_file.write(three_modules_config)
         self.config_file.seek(0)
-        q = Request('en', Missing())
+        q = Request('1', 'en', Missing())
         with HTTMock(my_module_mock, my_module2_mock, my_module3_mock):
             self.assertStatusInt(q.as_dict(), 502)
     def testQueriesMultipleModuleWithFail(self):
         self.config_file.write(one_valid_module_config)
         self.config_file.seek(0)
-        q = Request('en', Missing())
+        q = Request('1', 'en', Missing())
         m = {'relevance': 0.5, 'accuracy': 0.5}
         with HTTMock(my_module_mock, my_module4_mock):
             self.assertResponse(q, [

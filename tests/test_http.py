@@ -12,7 +12,7 @@ class HttpTest(PPPTestCase(app)):
     def testNotJson(self):
         self.assertEqual(self.app.post('/', 'foobar', status='*').status_int, 400)
     def testWorking(self):
-        q = {'language': 'en', 'tree': {'type': 'triple',
+        q = {'id': '1', 'language': 'en', 'tree': {'type': 'triple',
              'subject': {'type': 'resource', 'value': 'foo'},
              'predicate': {'type': 'resource', 'value': 'bar'},
              'object': {'type': 'resource', 'value': 'baz'},

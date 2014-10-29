@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ppp_core',
-    version='0.3.2',
+    version='0.4',
     description='Core/router of the PPP framework. Also contains a library ' \
                 'usable by module developpers to handle the query API.',
     url='https://github.com/ProjetPP/PPP-Core',
@@ -27,7 +27,7 @@ setup(
     ],
     install_requires=[
         'requests',
-        'ppp_datamodel>=0.3,<0.4',
+        'ppp_datamodel>=0.4,<0.5',
     ],
     packages=[
         'ppp_core',

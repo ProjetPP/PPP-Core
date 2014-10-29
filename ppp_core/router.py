@@ -14,6 +14,7 @@ s = lambda x:x if isinstance(x, str) else x.decode()
 
 class Router:
     def __init__(self, request):
+        self.id = request.id
         self.language = request.language
         self.tree = request.tree
         self.config = Config()
@@ -33,7 +34,7 @@ class Router:
     def _get_streams(self):
         headers = {'Content-type': 'application/json',
                    'Accept': 'application/json'}
-        payload = Request(self.language, self.tree).as_json()
+        payload = Request(self.id, self.language, self.tree).as_json()
         getter = functools.partial(requests.post, stream=True,
                                    headers=headers, data=payload)
         streams = []
