@@ -19,6 +19,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
@@ -26,7 +27,7 @@ setup(
     ],
     install_requires=[
         'requests',
-        'ppp_datamodel>=0.2,<0.3',
+        'ppp_datamodel>=0.3,<0.4',
     ],
     packages=[
         'ppp_core',

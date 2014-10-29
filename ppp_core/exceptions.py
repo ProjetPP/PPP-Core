@@ -5,6 +5,11 @@ class ClientError(Exception):
     client."""
     pass
 
+class BadGateway(Exception):
+    """Exception raised by the router when an error from a called
+    module has been detected."""
+    pass
+
 class InvalidConfig(Exception):
     """Exception raised when there is an error in the config."""
     pass
