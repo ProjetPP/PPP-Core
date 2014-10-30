@@ -15,8 +15,8 @@ class HttpTest(PPPTestCase(app)):
         q = {'id': '1', 'language': 'en', 'tree': {'type': 'triple',
              'subject': {'type': 'resource', 'value': 'foo'},
              'predicate': {'type': 'resource', 'value': 'bar'},
-             'object': {'type': 'resource', 'value': 'baz'},
-            }}
+             'object': {'type': 'resource', 'value': 'baz'}},
+              'measures': {}, 'trace': []}
         self.assertResponse(q, [])
     def testNoTree(self):
         q = {'language': 'en'}
