@@ -17,8 +17,7 @@ class Router:
     def __init__(self, request):
         self.id = request.id
         self.language = request.language
-        assert isinstance(request.tree, str) or \
-                isinstance(request.tree, AbstractNode)
+        assert isinstance(request.tree, AbstractNode)
         self.tree = request.tree
         self.measures = request.measures
         self.trace = request.trace
