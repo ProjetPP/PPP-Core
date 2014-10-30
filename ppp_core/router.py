@@ -74,7 +74,7 @@ class Router:
         missing = {'accuracy', 'relevance'} - set(answer.measures)
         if missing:
             logging.warning('Missing mandatory measures from module %s: %r' %
-                             (missing, module))
+                             (module, missing))
         accuracy = answer.measures.get('accuracy', 0)
         relevance = answer.measures.get('relevance', 0)
         if accuracy < 0 or accuracy > 1:

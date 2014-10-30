@@ -22,7 +22,13 @@ class HttpRequestHandler:
         self.router_class = router_class
     def make_response(self, status, content_type, response):
         """Shortcut for making a response to the client's request."""
-        self.start_response(status, [('Content-type', content_type)])
+        headers = [('Access-Control-Allow-Origin', '*'),
+                   ('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'),
+                   ('Access-Control-Allow-Headers', 'Content-Type'),
+                   ('Access-Control-Max-Age', '86400'),
+                   ('Content-type', content_type)
+                  ]
+        self.start_response(status, headers)
         return [response.encode()]
 
     def on_bad_method(self):
@@ -102,13 +108,7 @@ class HttpRequestHandler:
 
     def on_options(self):
         """Tells the client we allow requests from any Javascript script."""
-        headers = [('Access-Control-Allow-Origin', '*'),
-                   ('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'),
-                   ('Access-Control-Allow-Headers', 'Content-Type'),
-                  ]
-
-        self.start_response('200 OK', headers)
-        return []
+        return self.make_response('200 OK', 'text/html', '')
 
     def dispatch(self):
         """Handles dispatching of the request."""
@@ -121,4 +121,6 @@ class HttpRequestHandler:
 
 def app(environ, start_response):
     """Function called by the WSGI server."""
-    return HttpRequestHandler(environ, start_response, Router).dispatch()
+    r = HttpRequestHandler(environ, start_response, Router).dispatch()
+    print(repr(r))
+    return r
