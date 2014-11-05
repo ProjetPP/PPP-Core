@@ -8,7 +8,7 @@ import itertools
 import functools
 from ppp_datamodel import AbstractNode
 from ppp_datamodel.communication import Request, Response
-from .config import Config
+from .config import CoreConfig
 from .exceptions import ClientError, BadGateway
 
 s = lambda x:x if isinstance(x, str) else x.decode()
@@ -21,7 +21,7 @@ class Router:
         self.tree = request.tree
         self.measures = request.measures
         self.trace = request.trace
-        self.config = Config()
+        self.config = CoreConfig()
 
     def answer(self):
         # First make all requests so modules can prepare their answer
