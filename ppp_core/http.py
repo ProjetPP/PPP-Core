@@ -122,5 +122,4 @@ class HttpRequestHandler:
 def app(environ, start_response):
     """Function called by the WSGI server."""
     r = HttpRequestHandler(environ, start_response, Router).dispatch()
-    print(repr(r))
     return r

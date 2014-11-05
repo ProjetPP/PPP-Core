@@ -19,7 +19,7 @@ class Module(namedtuple('_Module', 'name url coefficient')):
 
 
 class Config:
-    __slots__ = ('debug', 'modules')
+    __slots__ = ('debug', 'modules', 'nb_passes')
     def __init__(self, data=None):
         self.debug = True
         if not data:
@@ -30,6 +30,7 @@ class Config:
                 raise InvalidConfig(*exc.args)
         self.modules = self._parse_modules(data.get('modules', {}))
         self.debug = data.get('debug', False)
+        self.nb_passes = data.get('recursion', {}).get('max_passes', 10)
 
     @staticmethod
     def get_config_path():
