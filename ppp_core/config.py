@@ -19,8 +19,12 @@ class Module(namedtuple('_Module', 'name url coefficient')):
 
 
 class Config:
-    __slots__ = ('debug', 'modules', 'nb_passes')
+    __slots__ = ('debug',)
     def __init__(self, data=None):
+        if not hasattr(self, 'config_path_variable') or \
+                not hasattr(self, 'parse_config'):
+            raise NotImplementedError('Config class does not implement all '
+                                      'required attributes.')
         self.debug = True
         if not data:
             try:
@@ -28,17 +32,24 @@ class Config:
                     data = json.load(fd)
             except ValueError as exc:
                 raise InvalidConfig(*exc.args)
+        self.parse_config(data)
+
+    @classmethod
+    def get_config_path(cls):
+        path = os.environ.get(cls.config_path_variable, '')
+        if not path:
+            raise InvalidConfig('Could not find config file, please set '
+                                'environment variable $%s.' %
+                                cls.config_path_variable)
+        return path
+class CoreConfig(Config):
+    __slots__ = ('modules', 'nb_passes')
+    config_path_variable = 'PPP_CORE_CONFIG'
+
+    def parse_config(self, data):
         self.modules = self._parse_modules(data.get('modules', {}))
         self.debug = data.get('debug', False)
         self.nb_passes = data.get('recursion', {}).get('max_passes', 10)
-
-    @staticmethod
-    def get_config_path():
-        path = os.environ.get('PPP_CORE_CONFIG', '')
-        if not path:
-            raise InvalidConfig('Could not find config file, please set '
-                                'environment variable $PPP_CORE_CONFIG.')
-        return path
 
     def _parse_modules(self, data):
         modules = []
@@ -50,3 +61,4 @@ class Config:
                         config['name'])
             modules.append(Module(**config))
         return modules
+
