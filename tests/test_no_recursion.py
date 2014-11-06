@@ -17,7 +17,10 @@ one_module_config = """
             "url": "http://test/my_module/",
             "coefficient": 1
         }
-    ]
+    ],
+    "recursion": {
+        "max_passes": 1
+    }
 }"""
 
 three_modules_config = """
@@ -39,7 +42,10 @@ three_modules_config = """
             "url": "http://test/my_module3/",
             "coefficient": 1
         }
-    ]
+    ],
+    "recursion": {
+        "max_passes": 1
+    }
 }"""
 
 one_valid_module_config = """
@@ -56,7 +62,10 @@ one_valid_module_config = """
             "url": "http://test/my_module4/",
             "coefficient": 1
         }
-    ]
+    ],
+    "recursion": {
+        "max_passes": 1
+    }
 }"""
 
 @urlmatch(netloc='test', path='/my_module/')
