@@ -7,7 +7,7 @@ import operator
 import itertools
 import functools
 from ppp_datamodel import AbstractNode
-from ppp_datamodel.communication import Request, Response
+from ppp_datamodel.communication import Request, Response, TraceItem
 from .config import CoreConfig
 from .exceptions import ClientError, BadGateway
 
@@ -16,10 +16,24 @@ s = lambda x:x if isinstance(x, str) else x.decode()
 DEFAULT_ACCURACY = 0
 DEFAULT_RELEVANCE = 0
 
+def freeze(obj):
+    if isinstance(obj, dict):
+        return frozenset((freeze(x), freeze(y)) for (x,y) in obj.items())
+    elif isinstance(obj, list):
+        return tuple(map(freeze, obj))
+    elif isinstance(obj, set):
+        return frozenset(map(freeze, obj))
+    elif isinstance(obj, TraceItem):
+        return freeze(obj.as_dict())
+    elif isinstance(obj, (str, tuple, frozenset, int, float)):
+        return obj
+    else:
+        raise Exception(obj)
+
 def answer_id(answer):
     return (answer.language, answer.tree,
             frozenset(answer.measures.items()),
-            answer.tree)
+            freeze(answer.trace))
 def remove_duplicates(reference, new):
     return filter(lambda x:answer_id(x) not in reference, new)
 
@@ -46,7 +60,7 @@ class Router:
             for request in requests:
                 new_answers.extend(self.one_pass(request))
             # Remove duplicates, and update the answer list
-            new_answers = list(remove_duplicates(answers, new_answers))
+            new_answers = list(remove_duplicates(answer_ids, new_answers))
             answers.extend(new_answers)
             answer_ids.update(map(answer_id, new_answers))
         # TODO: should sort according to accuracy too
