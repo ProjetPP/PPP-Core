@@ -8,7 +8,7 @@ import itertools
 import functools
 from ppp_datamodel import AbstractNode
 from ppp_datamodel.communication import Request, Response, TraceItem
-from .config import CoreConfig
+from ppp_libmodule.config import CoreConfig
 from .exceptions import ClientError, BadGateway
 
 s = lambda x:x if isinstance(x, str) else x.decode()

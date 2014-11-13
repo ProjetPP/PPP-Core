@@ -5,7 +5,7 @@ from httmock import urlmatch, HTTMock, with_httmock, all_requests
 
 from ppp_datamodel import Missing
 from ppp_datamodel.communication import Request, TraceItem, Response
-from ppp_core.tests import PPPTestCase
+from ppp_libmodule.tests import PPPTestCase
 from ppp_core import app
 
 one_module_config = """

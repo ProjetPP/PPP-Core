@@ -5,7 +5,7 @@ import tempfile
 from ppp_core import app
 from webtest import TestApp
 from unittest import TestCase
-from ppp_core.exceptions import InvalidConfig
+from ppp_libmodule.exceptions import InvalidConfig
 
 
 class NoConfFileTestCase(TestCase):
