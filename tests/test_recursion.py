@@ -6,7 +6,7 @@ from ppp_datamodel.communication import Request, TraceItem, Response
 from ppp_libmodule.tests import PPPTestCase
 from ppp_core import app
 
-config = """
+config1 = """
 {
     "debug": true,
     "modules": [
@@ -70,10 +70,10 @@ def my_module3_mock(url, request):
                          (c, c)}
 
 
-class TestRecursion(PPPTestCase(app)):
+class TestRecursion1(PPPTestCase(app)):
+    config_var = 'PPP_CORE_CONFIG'
+    config = config1
     def testRecursion(self):
-        self.config_file.write(config)
-        self.config_file.seek(0)
         q = Request('1', 'en', Resource('one'), {}, [])
         with HTTMock(my_module_mock, my_module2_mock, my_module3_mock):
             answers = self.request(q)
@@ -81,9 +81,10 @@ class TestRecursion(PPPTestCase(app)):
             self.assertEqual(answers[0].tree, Resource('three'))
             self.assertEqual(answers[1].tree, Resource('two'))
 
+class TestRecursion2(PPPTestCase(app)):
+    config_var = 'PPP_CORE_CONFIG'
+    config = config2
     def testNoDuplicate(self):
-        self.config_file.write(config2)
-        self.config_file.seek(0)
         q = Request('1', 'en', Missing(), {}, [])
         with HTTMock(my_module3_mock):
             answers = self.request(q)

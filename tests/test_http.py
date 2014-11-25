@@ -4,6 +4,13 @@ from ppp_libmodule.tests import PPPTestCase
 from ppp_core import app
 
 class HttpTest(PPPTestCase(app)):
+    config_var = 'PPP_CORE_CONFIG'
+    config = """
+    {
+        "debug": true,
+        "modules": []
+    }
+    """
     def testPostOnly(self):
         self.assertEqual(self.app.get('/', status='*').status_int, 405)
         self.assertEqual(self.app.put('/', status='*').status_int, 405)
