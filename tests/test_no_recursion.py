@@ -100,6 +100,8 @@ def my_module4_mock(url, request):
                          '"trace": [{"module": "module4", %s}]}]' % (c, c)}
 
 class CallModuleTest(PPPTestCase(app)):
+    config_var = 'PPP_CORE_CONFIG'
+    config = ''
     def testQueriesModule(self):
         self.config_file.write(one_module_config)
         self.config_file.seek(0)
