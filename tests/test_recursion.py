@@ -31,6 +31,11 @@ config2 = """
             "name": "my_module3",
             "url": "http://test/my_module3/",
             "coefficient": 1
+        },
+        {
+            "name": "my_module3b",
+            "url": "http://test/my_module3b/",
+            "coefficient": 1
         }
     ]
 }"""
@@ -69,6 +74,14 @@ def my_module3_mock(url, request):
                          '"trace": [{"module": "module3", %s}]}]' %
                          (c, c)}
 
+@urlmatch(netloc='test', path='/my_module3b/')
+def my_module3b_mock(url, request):
+    c = '"measures": {"accuracy": 1, "relevance": 1}, "tree": {"type": "resource", "value": "two"}'
+    return {'status_code': 200,
+            'content': '[{"language": "en", %s, '
+                         '"trace": [{"module": "module3", %s}]}]' %
+                         (c, c)}
+
 
 class TestRecursion1(PPPTestCase(app)):
     config_var = 'PPP_CORE_CONFIG'
@@ -86,7 +99,9 @@ class TestRecursion2(PPPTestCase(app)):
     config = config2
     def testNoDuplicate(self):
         q = Request('1', 'en', Missing(), {}, [])
-        with HTTMock(my_module3_mock):
+        with HTTMock(my_module3_mock, my_module3b_mock):
             answers = self.request(q)
+            self.assertNotEqual(len(answers), 20, answers)
             self.assertNotEqual(len(answers), 10, answers)
+            self.assertNotEqual(len(answers), 2, answers)
             self.assertEqual(len(answers), 1, answers)
