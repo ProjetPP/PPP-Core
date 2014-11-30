@@ -35,7 +35,14 @@ def answer_id(answer):
             frozenset(answer.measures.items()),
             freeze(answer.trace))
 def remove_duplicates(reference, new):
-    return filter(lambda x:answer_id(x) not in reference, new)
+    result = []
+    for x in new:
+        id_ = answer_id(x)
+        if id_ in reference:
+            continue
+        reference.add(id_)
+        result.append(x)
+    return result
 
 
 class Router:
@@ -62,7 +69,6 @@ class Router:
             # Remove duplicates, and update the answer list
             new_answers = list(remove_duplicates(answer_ids, new_answers))
             answers.extend(new_answers)
-            answer_ids.update(map(answer_id, new_answers))
         # TODO: should sort according to accuracy too
         return sorted(answers,
                       key=lambda x:x.measures.get('relevance', DEFAULT_RELEVANCE),
