@@ -111,7 +111,12 @@ class Router:
                             (module, stream.status_code, stream.content))
             return None
         else:
-            return (module, json.loads(s(stream.content)))
+            try:
+                return (module, json.loads(s(stream.content)))
+            except ValueError:
+                logging.warning('Module %s returned 200: %s' %
+                                (module, stream.status_code, stream.content))
+                return None
 
     def _process_answers(self, t):
         if t:
