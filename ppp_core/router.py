@@ -114,7 +114,7 @@ class Router:
             try:
                 return (module, json.loads(s(stream.content)))
             except ValueError:
-                logging.warning('Module %s returned 200: %s' %
+                logging.warning('Module %s returned %d: %s' %
                                 (module, stream.status_code, stream.content))
                 return None
 
