@@ -32,8 +32,7 @@ def freeze(obj):
 
 def answer_id(answer):
     return (answer.language, answer.tree,
-            frozenset(answer.measures.items()),
-            freeze(answer.trace))
+            frozenset(answer.measures.items()))
 def remove_duplicates(reference, new):
     result = []
     for x in new:
