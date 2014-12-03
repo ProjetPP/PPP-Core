@@ -96,7 +96,8 @@ class Router:
         streams = []
         for module in self.config.modules:
             try:
-                streams.append((module, getter(module.url)))
+                if module.should_send(request):
+                    streams.append((module, getter(module.url)))
             except requests.exceptions.ConnectionError as exc: # pragma: no cover
                 logging.warning('Module %s could not be queried: %s' %
                                 (module, exc.args[0]))
