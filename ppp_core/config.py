@@ -7,15 +7,21 @@ from collections import namedtuple
 from ppp_libmodule.config import Config
 from ppp_libmodule.exceptions import InvalidConfig
 
-class Module(namedtuple('_Module', 'name url coefficient filters')):
+class Module(namedtuple('_Module', 'name url coefficient filters method')):
     """Represents a modules of the core with its name, URL, and a
     coefficient applied to it self-computed pertinence."""
     def __new__(cls, name, url, coefficient=1, filters=None, **kwargs):
         if kwargs: # pragma: no cover
             logging.warning('Ignored arguments to module config: %r' % kwargs)
+        if url.startswith('python:'):
+            url = url[len('python:'):]
+            method = 'python'
+        else:
+            method = 'http'
         return super(Module, cls).__new__(cls,
                                           name=name,
                                           url=url,
+                                          method=method,
                                           coefficient=coefficient,
                                           filters=filters or {})
 

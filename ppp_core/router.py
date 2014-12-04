@@ -84,8 +84,28 @@ class Router:
         answers = map(self._stream_reader, streams)
         answers = map(self._process_answers, answers)
         answers = itertools.chain(*list(answers)) # Flatten answers lists
+        answers = itertools.chain(self._get_python(request), answers)
         answers = filter(bool, answers) # Eliminate None values
         return answers
+
+    def _get_python_class(self, url):
+        tokens = url.split('.')
+        for i in range(0, len(tokens)-1):
+            try:
+                __import__('.'.join(tokens[0:i+1]))
+            except ImportError:
+                break
+        cls = __import__('.'.join(tokens[0:i]))
+        for token in tokens[i:]:
+            cls = getattr(cls, token)
+        return cls
+
+    def _get_python(self, request):
+        for module in self.config.modules:
+            if module.should_send(request) and module.method == 'python':
+                obj = self._get_python_class(module.url)(request)
+                for answer in obj.answer():
+                    yield answer
 
     def _get_streams(self, request):
         headers = {'Content-type': 'application/json',
@@ -96,7 +116,7 @@ class Router:
         streams = []
         for module in self.config.modules:
             try:
-                if module.should_send(request):
+                if module.should_send(request) and module.method == 'http':
                     streams.append((module, getter(module.url)))
             except requests.exceptions.ConnectionError as exc: # pragma: no cover
                 logging.warning('Module %s could not be queried: %s' %
