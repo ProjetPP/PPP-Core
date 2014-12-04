@@ -19,6 +19,17 @@ class Module(namedtuple('_Module', 'name url coefficient filters')):
                                           coefficient=coefficient,
                                           filters=filters or {})
 
+    def should_send(self, request):
+        """Returns whether or not the request should be sent to the
+        modules, based on the filters."""
+        if self.filters.get('whitelist', None):
+            return request.tree.type in self.filters['whitelist']
+        elif self.filters.get('blacklist', None):
+            return request.tree.type not in self.filters['blacklist']
+        else:
+            return True
+
+
 class CoreConfig(Config):
     __slots__ = ('modules', 'nb_passes')
     config_path_variable = 'PPP_CORE_CONFIG'
