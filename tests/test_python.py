@@ -18,12 +18,12 @@ config1 = """
         },
         {
             "name": "my_module2",
-            "url": "python:tests.test_python.Module2",
+            "url": "python:tests.test_python:Module2",
             "coefficient": 1
         },
         {
             "name": "my_module3",
-            "url": "python:tests.test_python.Module3",
+            "url": "python:tests.test_python:Module3",
             "coefficient": 1
         }
     ]

@@ -7,6 +7,7 @@ import operator
 import itertools
 import functools
 import traceback
+import importlib
 from ppp_datamodel import AbstractNode
 from ppp_datamodel.communication import Request, Response, TraceItem
 from .config import CoreConfig
@@ -92,14 +93,9 @@ class Router:
         return answers
 
     def _get_python_class(self, url):
-        tokens = url.split('.')
-        for i in range(0, len(tokens)-1):
-            try:
-                __import__('.'.join(tokens[0:i+1]))
-            except ImportError:
-                break
-        cls = __import__('.'.join(tokens[0:i]))
-        for token in tokens[i:]:
+        (module_path, class_path) = url.split(':')
+        cls = importlib.import_module(module_path)
+        for token in class_path.split('.'):
             cls = getattr(cls, token)
         return cls
 
