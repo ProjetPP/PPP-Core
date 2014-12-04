@@ -6,6 +6,7 @@ import requests
 import operator
 import itertools
 import functools
+import traceback
 from ppp_datamodel import AbstractNode
 from ppp_datamodel.communication import Request, Response, TraceItem
 from .config import CoreConfig
@@ -15,6 +16,8 @@ s = lambda x:x if isinstance(x, str) else x.decode()
 
 DEFAULT_ACCURACY = 0
 DEFAULT_RELEVANCE = 0
+
+logger = logging.Logger('router')
 
 def freeze(obj):
     if isinstance(obj, dict):
@@ -84,8 +87,34 @@ class Router:
         answers = map(self._stream_reader, streams)
         answers = map(self._process_answers, answers)
         answers = itertools.chain(*list(answers)) # Flatten answers lists
+        answers = itertools.chain(self._get_python(request), answers)
         answers = filter(bool, answers) # Eliminate None values
         return answers
+
+    def _get_python_class(self, url):
+        tokens = url.split('.')
+        for i in range(0, len(tokens)-1):
+            try:
+                __import__('.'.join(tokens[0:i+1]))
+            except ImportError:
+                break
+        cls = __import__('.'.join(tokens[0:i]))
+        for token in tokens[i:]:
+            cls = getattr(cls, token)
+        return cls
+
+    def _get_python(self, request):
+        for module in self.config.modules:
+            if module.should_send(request) and module.method == 'python':
+                try:
+                    obj = self._get_python_class(module.url)(request)
+                    for answer in obj.answer():
+                        yield answer
+                except KeyboardInterrupt:
+                    raise
+                except Exception:
+                    tb = traceback.format_exc()
+                    logger.error('Error in module %s\n: %s' % (module, tb))
 
     def _get_streams(self, request):
         headers = {'Content-type': 'application/json',
@@ -96,10 +125,10 @@ class Router:
         streams = []
         for module in self.config.modules:
             try:
-                if module.should_send(request):
+                if module.should_send(request) and module.method == 'http':
                     streams.append((module, getter(module.url)))
             except requests.exceptions.ConnectionError as exc: # pragma: no cover
-                logging.warning('Module %s could not be queried: %s' %
+                logger.warning('Module %s could not be queried: %s' %
                                 (module, exc.args[0]))
                 pass
         return streams
@@ -107,14 +136,14 @@ class Router:
     def _stream_reader(self, stream):
         (module, stream) = stream
         if stream.status_code != 200:
-            logging.warning('Module %s returned %d: %s' %
+            logger.warning('Module %s returned %d: %s' %
                             (module, stream.status_code, stream.content))
             return None
         else:
             try:
                 return (module, json.loads(s(stream.content)))
             except ValueError:
-                logging.warning('Module %s returned %d: %s' %
+                logger.warning('Module %s returned %d: %s' %
                                 (module, stream.status_code, stream.content))
                 return None
 
@@ -129,12 +158,12 @@ class Router:
     def _process_answer(self, module, answer):
         missing = {'accuracy', 'relevance'} - set(answer.measures)
         if missing:
-            logging.warning('Missing mandatory measures from module %s: %r' %
+            logger.warning('Missing mandatory measures from module %s: %r' %
                              (module, missing))
         accuracy = answer.measures.get('accuracy', DEFAULT_ACCURACY)
         relevance = answer.measures.get('relevance', DEFAULT_RELEVANCE)
         if accuracy < 0 or accuracy > 1:
-            logging.warning('Module %s answered with invalid accuracy: %r' %
+            logger.warning('Module %s answered with invalid accuracy: %r' %
                     (module, accuracy))
             return None
         answer.measures['accuracy'] = accuracy
