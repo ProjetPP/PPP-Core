@@ -95,6 +95,9 @@ class Router:
                 __import__('.'.join(tokens[0:i+1]))
             except ImportError:
                 break
+            except ValueError as e:
+                # Python 3.2?
+                raise ValueError(e.args[0], '.'.join(tokens[0:i+1]))
         cls = __import__('.'.join(tokens[0:i]))
         for token in tokens[i:]:
             cls = getattr(cls, token)
