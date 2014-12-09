@@ -57,6 +57,8 @@ class FakeLogger:
         self._errors = []
     def error(self, s):
         self._errors.append(s)
+    def info(self, s):
+        pass
 
 class TestPython(PPPTestCase(app)):
     config_var = 'PPP_CORE_CONFIG'

@@ -54,6 +54,7 @@ class Router:
         self.language = request.language
         assert isinstance(request.tree, AbstractNode)
         self.tree = request.tree
+        logger.info('Request: %s' % self.tree)
         self.measures = request.measures
         self.trace = request.trace
         self.config = CoreConfig()
