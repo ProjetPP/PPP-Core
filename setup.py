@@ -24,7 +24,7 @@ setup(
     ],
     install_requires=[
         'requests',
-        'ppp_datamodel>=0.5.2,<0.6',
+        'ppp_datamodel>=0.5.2,<0.7',
         'ppp_libmodule>=0.7,<0.8',
     ],
     packages=[
