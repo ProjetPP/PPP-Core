@@ -43,7 +43,7 @@ def remove_duplicates(reference, new):
         id_ = answer_id(x)
         if id_ in reference:
             continue
-        reference.add(id_)
+        reference.append(id_)
         result.append(x)
     return result
 
@@ -60,7 +60,7 @@ class Router:
         self.config = CoreConfig()
 
     def answer(self):
-        answer_ids = set()
+        answer_ids = []
         answers = []
         new_answers = [Response(self.language, self.tree,
                                 self.measures, self.trace)]
