@@ -18,7 +18,12 @@ s = lambda x:x if isinstance(x, str) else x.decode()
 DEFAULT_ACCURACY = 0
 DEFAULT_RELEVANCE = 0
 
-logger = logging.Logger('router')
+level = getattr(logging, CoreConfig().loglevel.upper(), None)
+if not isinstance(level, int):
+    logger.error('Invalid log level: %s' % self.config.loglevel)
+else:
+    logging.basicConfig(level=level)
+logger = logging.getLogger('router')
 
 def freeze(obj):
     if isinstance(obj, dict):
@@ -58,11 +63,6 @@ class Router:
         self.measures = request.measures
         self.trace = request.trace
         self.config = CoreConfig()
-        level = getattr(logging, self.config.loglevel.upper(), None)
-        if not level:
-            logging.error('Invalid log level: %s' % self.config.loglevel)
-        else:
-            logging.basicConfig(level=level)
 
     def answer(self):
         answer_ids = []
