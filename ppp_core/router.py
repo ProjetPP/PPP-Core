@@ -58,6 +58,11 @@ class Router:
         self.measures = request.measures
         self.trace = request.trace
         self.config = CoreConfig()
+        level = getattr(logging, self.config.loglevel.upper(), None)
+        if not level:
+            logging.error('Invalid log level: %s' % self.config.loglevel)
+        else:
+            logging.basicConfig(level=level)
 
     def answer(self):
         answer_ids = []

@@ -1,5 +1,8 @@
 {
     "debug": false,
+    "log": {
+        "level": "warning"
+    },
     "modules": [
         {
             "name": "my_module",

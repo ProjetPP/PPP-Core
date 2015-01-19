@@ -37,13 +37,14 @@ class Module(namedtuple('_Module', 'name url coefficient filters method')):
 
 
 class CoreConfig(Config):
-    __slots__ = ('modules', 'nb_passes')
+    __slots__ = ('modules', 'nb_passes', 'loglevel')
     config_path_variable = 'PPP_CORE_CONFIG'
 
     def parse_config(self, data):
         self.modules = self._parse_modules(data.get('modules', {}))
         self.debug = data.get('debug', False)
         self.nb_passes = data.get('recursion', {}).get('max_passes', 10)
+        self.loglevel = data.get('log', {}).get('level', 'warning')
 
     def _parse_modules(self, data):
         modules = []
