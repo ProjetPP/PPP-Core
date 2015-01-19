@@ -8,6 +8,7 @@ import itertools
 import functools
 import traceback
 import importlib
+import ppp_libmodule
 from ppp_datamodel import AbstractNode
 from ppp_datamodel.communication import Request, Response, TraceItem
 from .config import CoreConfig
@@ -18,11 +19,15 @@ s = lambda x:x if isinstance(x, str) else x.decode()
 DEFAULT_ACCURACY = 0
 DEFAULT_RELEVANCE = 0
 
-level = getattr(logging, CoreConfig().loglevel.upper(), None)
-if not isinstance(level, int):
-    logger.error('Invalid log level: %s' % self.config.loglevel)
+try:
+    level = getattr(logging, CoreConfig().loglevel.upper(), None)
+except ppp_libmodule.exceptions.InvalidConfig:
+    pass
 else:
-    logging.basicConfig(level=level)
+    if not isinstance(level, int):
+        logger.error('Invalid log level: %s' % self.config.loglevel)
+    else:
+        logging.basicConfig(level=level)
 logger = logging.getLogger('router')
 
 def freeze(obj):
