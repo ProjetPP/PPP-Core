@@ -153,6 +153,8 @@ class Router:
                 logger.warning('Module %s returned %d: %s' %
                                 (module, stream.status_code, stream.content))
                 return None
+            finally:
+                stream.close()
 
     def _process_answers(self, t):
         if t:
