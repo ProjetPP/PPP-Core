@@ -42,7 +42,7 @@ class Module2:
         self.request = request
 
     def answer(self):
-        return [Response(1, self.request.tree, {}, [])]
+        return [Response('en', self.request.tree, {}, [])]
 
 class Module3:
     def __init__(self, request):
