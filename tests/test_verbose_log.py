@@ -4,6 +4,7 @@ import os
 import json
 import time
 import sqlite3
+import unittest
 import tempfile
 
 from httmock import urlmatch, HTTMock, with_httmock, all_requests
@@ -13,6 +14,13 @@ from ppp_datamodel import Resource, Missing
 from ppp_libmodule.tests import PPPTestCase
 
 from ppp_core import app
+
+try:
+    import __pypy__
+except ImportError:
+    PYPY = False
+else:
+    PYPY = True
 
 config1 = """
 {
@@ -54,6 +62,7 @@ class TestVerboseLog(PPPTestCase(app)):
         super().tearDown()
         self.fd.close()
 
+    @unittest.skipIf(PYPY, 'https://bitbucket.org/pypy/pypy/issues/2268/_sqlite3operationalerror-disk-i-o-error')
     def testVerboseLog(self):
         q = Request('1', 'en', Resource('one'), {}, [])
         with HTTMock(my_module_mock):
