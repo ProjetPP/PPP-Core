@@ -59,7 +59,7 @@ class TestVerboseLog(PPPTestCase(app)):
         with HTTMock(my_module_mock):
             answers = self.request(q)
 
-        time.sleep(0.1)
+        time.sleep(0.5)
 
         conn = sqlite3.connect(self.fd.name)
         with conn:
