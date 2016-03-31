@@ -1,5 +1,6 @@
 """Router of the PPP core."""
 
+import time
 import json
 import logging
 import requests
@@ -8,11 +9,13 @@ import itertools
 import functools
 import traceback
 import importlib
+import threading
 import ppp_libmodule
 from ppp_datamodel import AbstractNode
 from ppp_datamodel.communication import Request, Response, TraceItem
 from .config import CoreConfig
 from .exceptions import ClientError, BadGateway
+from . import verbose_log
 
 s = lambda x:x if isinstance(x, str) else x.decode()
 
@@ -70,6 +73,7 @@ class Router:
         self.config = CoreConfig()
 
     def answer(self):
+        start_time = time.time()
         answer_ids = []
         answers = []
         new_answers = [Response(self.language, self.tree,
@@ -84,9 +88,16 @@ class Router:
             new_answers = list(remove_duplicates(answer_ids, new_answers))
             answers.extend(new_answers)
         # TODO: should sort according to accuracy too
-        return sorted(answers,
+        answers = sorted(answers,
                       key=lambda x:x.measures.get('relevance', DEFAULT_RELEVANCE),
                       reverse=True)
+
+        # Log answers in an other thread, so it does not add a delay.
+        end_time = time.time()
+        threading.Thread(target=verbose_log.log_answers,
+                args=(self.config, answers, start_time, end_time)).start()
+
+        return answers
 
     def request_from_answer(self, answer):
         return Request(self.id, answer.language, answer.tree,
