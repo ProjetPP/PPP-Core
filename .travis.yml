@@ -9,7 +9,7 @@ python:
   - pypy3
 
 install:
-    - pip install scrutinizer-ocular webtest httmock requests
+    - pip install scrutinizer-ocular webtest httmock requests sqlalchemy
     # Coveralls 4.0 doesn't support Python 3.2
     - if [ "$TRAVIS_PYTHON_VERSION" == "3.2" ]; then travis_retry pip install coverage==3.7.1; fi
     - if [ "$TRAVIS_PYTHON_VERSION" != "3.2" ]; then travis_retry pip install coverage; fi
